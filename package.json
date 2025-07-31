@@ -1,5 +1,8 @@
 {
 	"name": "@ironblood/certcli",
+	"publishConfig": {
+		"access": "public"
+	},
 	"bin": {
 		"certcli": "dist/cli.js"
 	},
