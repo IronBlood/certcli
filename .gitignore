@@ -1,0 +1,19 @@
+node_modules/
+dist/
+
+# TypeScript build info
+tsconfig.tsbuildinfo
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# macOS metadata
+.DS_Store
+
+coverage/
+
+# editor folders
+.idea/
+.vscode/
