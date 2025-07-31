@@ -1,5 +1,5 @@
 {
-	"name": "certcli",
+	"name": "@ironblood/certcli",
 	"bin": {
 		"certcli": "dist/cli.js"
 	},
@@ -23,7 +23,10 @@
 		"dist"
 	],
 	"author": "Yang Shen <aplshenyang@gmail.com>",
-	"repository": "github:IronBlood/certcli",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/IronBlood/certcli.git"
+	},
 	"homepage": "https://github.com/IronBlood/certcli#readme",
 	"bugs": "https://github.com/IronBlood/certcli/issues",
 	"license": "MIT",

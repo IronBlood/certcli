@@ -23,7 +23,7 @@ This CLI is designed for people who know what they are doing and just want to ge
 Install globally via npm:
 
 ```bash
-npm install -g certcli
+npm install -g @ironblood/certcli
 ```
 
 Develop locally:
