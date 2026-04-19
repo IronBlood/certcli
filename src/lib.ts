@@ -109,25 +109,13 @@ interface Account {
 		termsOfServiceAgreed: boolean;
 	};
 	registration_payload_b64: string;
-	update_payload_json: {
-		contact: string[];
-	};
-	update_payload_b64: string;
 }
 
 export async function createAccountAsync({
-	email,
 	pubkey,
 }: {
-	email: string;
 	pubkey: string;
 }): Promise<Account> {
-	// validate email
-	const email_re = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
-	if (!email_re.test(email)) {
-		throw "Account email doesn't look valid.";
-	}
-
 	// parse account public key
 	if (pubkey === "") {
 		throw "You need to include an account public key.";
@@ -147,9 +135,6 @@ export async function createAccountAsync({
 	let registration_payload_json = {
 		termsOfServiceAgreed: true,
 	};
-	let update_payload_json = {
-		contact: [ "mailto:" + email ],
-	};
 
 	return {
 		pubkey,
@@ -158,8 +143,6 @@ export async function createAccountAsync({
 		thumbprint: b64(hash),
 		registration_payload_json,
 		registration_payload_b64: b64(JSON.stringify(registration_payload_json)),
-		update_payload_json,
-		update_payload_b64: b64(JSON.stringify(update_payload_json)),
 	};
 }
 
@@ -213,11 +196,13 @@ export async function validateRegistrationAsync({
 	account,
 	directory,
 	openssl_order_signature,
+	order,
 	registration_protected_b64,
 }: {
 	account: Account,
 	directory: DirectoryResponse,
 	openssl_order_signature: string;
+	order: ReturnType<typeof createOrder>;
 	registration_protected_b64: string,
 }) {
 	const signature = hex2b64(openssl_order_signature);
@@ -247,54 +232,6 @@ export async function validateRegistrationAsync({
 
 	const nonce = await getNonceAsync(directory);
 
-	const update_protected_json = {
-		url: account_uri,
-		alg: account.alg,
-		nonce,
-		kid: account_uri,
-	};
-	const update_protected_b64 = b64(JSON.stringify(update_protected_json));
-
-	return {
-		account_uri,
-		update_protected_b64,
-		cmd: `${update_protected_b64}.${account.update_payload_b64}`
-	};
-}
-
-// Step: 3b
-export async function validateUpdateAsync({
-	account,
-	account_uri,
-	directory,
-	openssl_registration_signature,
-	order,
-	update_protected_b64,
-}: {
-	account: Account;
-	account_uri: string;
-	directory: DirectoryResponse;
-	openssl_registration_signature: string;
-	order: ReturnType<typeof createOrder>;
-	update_protected_b64: string;
-}) {
-	const signature = hex2b64(openssl_registration_signature);
-	const response = await fetch(account_uri, {
-		method: "POST",
-		headers: FETCH_HEADERS,
-		body: JSON.stringify({
-			protected: update_protected_b64,
-			payload: account.update_payload_b64,
-			signature,
-		}),
-	});
-
-	if (response.status != 200) {
-		throw "Account contact update failed. Please start back at Step 1.";
-	}
-
-	const nonce = await getNonceAsync(directory);
-
 	const order_protected_json = {
 		url: directory.newOrder,
 		alg: account.alg,
@@ -305,26 +242,27 @@ export async function validateUpdateAsync({
 	const order_protected_b64 = b64(JSON.stringify(order_protected_json));
 
 	return {
+		account_uri,
 		order_protected_b64,
 		cmd: `${order_protected_b64}.${order.order_payload_b64}`,
 	};
 }
 
 /*
- * Step 3c: Create New Order (POST /newOrder)
+ * Step 3b: Create New Order (POST /newOrder)
  */
 export async function validateOrderAsync({
 	directory,
-	openssl_validate_order_signature,
+	openssl_registration_signature,
 	order,
 	order_protected_b64,
 }: {
 	directory: DirectoryResponse;
-	openssl_validate_order_signature: string;
+	openssl_registration_signature: string;
 	order: ReturnType<typeof createOrder>;
 	order_protected_b64: string;
 }) {
-	const signature = hex2b64(openssl_validate_order_signature);
+	const signature = hex2b64(openssl_registration_signature);
 	const response = await fetch(directory.newOrder, {
 		method: "POST",
 		headers: FETCH_HEADERS,

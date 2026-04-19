@@ -19,7 +19,6 @@ import {
 	createOrder,
 	createOrderCmdAsync,
 	validateRegistrationAsync,
-	validateUpdateAsync,
 	validateOrderAsync,
 	buildAuthorizationAsync,
 	validateAuthorizationAsync,
@@ -50,7 +49,7 @@ const argv = yargs(hideBin(process.argv))
 	.usage("Usage: $0 [options]")
 	.example([
 		[
-			"$0 -k account.key -p account.pub -s domain.csr -e test@example.com -c domain.crt",
+			"$0 -k account.key -p account.pub -s domain.csr -c domain.crt",
 			"Get a certificate and save to `domain.crt`"
 		],
 		[
@@ -73,12 +72,6 @@ const argv = yargs(hideBin(process.argv))
 	.option("csr", {
 		alias: "s",
 		describe: "Path to the certificate signing request",
-		type: "string",
-		demandOption: true,
-	})
-	.option("email", {
-		alias: "e",
-		describe: "Contact email",
 		type: "string",
 		demandOption: true,
 	})
@@ -152,8 +145,6 @@ async function main() {
 		console.log(`  - ${chalk.green(argv.priv_key)}`);
 		console.log(chalk.cyan("Public Key:"));
 		console.log(`  - ${chalk.green(argv.pub_key)}`);
-		console.log(chalk.cyan("Email:"));
-		console.log(`  - ${chalk.yellow(argv.email)}`);
 		console.log(chalk.cyan("Domains:"));
 		domains.forEach((domain) => {
 			console.log(`  - ${chalk.magenta(domain)}`);
@@ -185,7 +176,6 @@ async function main() {
 
 	const stage_account = ora(`Validating account info...`).start();
 	const account = await createAccountAsync({
-		email: argv.email,
 		pubkey,
 	});
 	stage_account.succeed(`Account validated`);
@@ -213,37 +203,20 @@ async function main() {
 	const stage_term = ora("Accepting terms...").start();
 	const {
 		account_uri,
-		update_protected_b64,
-		cmd: registration_cmd,
+		order_protected_b64,
+		cmd: order_sig_cmd,
 	} = await validateRegistrationAsync({
 		directory,
 		account,
 		openssl_order_signature,
+		order,
 		registration_protected_b64,
 	});
 	const openssl_registration_signature = await opensslSignAsync({
-		content: registration_cmd,
-		priv_key: argv.priv_key,
-	});
-	stage_term.succeed("Terms accepted");
-
-	const stage_validate = ora(`Updating yout account email ${argv.email}...`).start();
-	const {
-		order_protected_b64,
-		cmd: order_sig_cmd,
-	} = await validateUpdateAsync({
-		account,
-		account_uri,
-		directory,
-		openssl_registration_signature,
-		order,
-		update_protected_b64,
-	});
-	const openssl_validate_order_signature = await opensslSignAsync({
 		content: order_sig_cmd,
 		priv_key: argv.priv_key,
 	});
-	stage_validate.succeed("Email updated");
+	stage_term.succeed("Terms accepted");
 
 	const stage_update_order = ora("Creating your certificate order").start();
 	const {
@@ -251,7 +224,7 @@ async function main() {
 		order_response,
 	} = await validateOrderAsync({
 		directory,
-		openssl_validate_order_signature,
+		openssl_registration_signature,
 		order,
 		order_protected_b64,
 	});
