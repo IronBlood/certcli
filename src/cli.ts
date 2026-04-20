@@ -378,9 +378,6 @@ async function main() {
 
 		if (obj.status === "valid")
 			continue;
-
-		// FIXME
-		console.log(obj);
 	}
 
 	const stage_finalize_order = ora(`Finalizing order...`).start();

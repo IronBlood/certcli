@@ -473,7 +473,6 @@ export async function checkAuthorizationAsync({
 	const status = auth_obj.status;
 
 	if (status === "pending") {
-		console.log(auth_obj);
 		const nonce = await getNonceAsync(directory);
 		const recheck_auth_protected_json = {
 			url: challenge.url,
