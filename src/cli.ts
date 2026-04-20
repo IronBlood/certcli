@@ -44,6 +44,7 @@ import {
 import {
 	opensslSignAsync,
 } from "./openssl_exec";
+import { sleep } from "./utils";
 
 const argv = yargs(hideBin(process.argv))
 	.usage("Usage: $0 [options]")
@@ -383,6 +384,7 @@ async function main() {
 	}
 
 	const stage_finalize_order = ora(`Finalizing order...`).start();
+	await sleep(10_000);
 	const {
 		finalize_payload_b64,
 		finalize_protected_b64,
@@ -398,6 +400,7 @@ async function main() {
 		content: finalize_order_cmd,
 		priv_key: argv.priv_key,
 	});
+	await sleep(1000);
 	const {
 		recheck_order_protected_b64,
 		cmd: foo,
