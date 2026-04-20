@@ -36,7 +36,7 @@
 	"devDependencies": {
 		"@types/global-agent": "^3.0.0",
 		"@types/jest": "^30.0.0",
-		"@types/node": "^24.1.0",
+		"@types/node": "^25.6.0",
 		"@types/node-forge": "^1.3.13",
 		"@types/yargs": "^17.0.33",
 		"jest": "^30.0.5",
