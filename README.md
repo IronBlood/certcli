@@ -49,7 +49,6 @@ certcli \
   -p /path/to/account.pub \
   -k /path/to/account.key \
   -s /path/to/domain.csr  \
-  -e test@example.com     \
   -c /path/to/domain.crt
 ```
 
@@ -66,15 +65,13 @@ Options:
   -k, --priv_key   Path to your account private key          [string] [required]
   -p, --pub_key    Path to your account public key           [string] [required]
   -s, --csr        Path to the certificate signing request   [string] [required]
-  -e, --email      Contact email                             [string] [required]
   -c, --cert_file  Path to save the certificate file                    [string]
   -d, --dry_run    Perform a dry run                                     [count]
   -h, --help       Show help                                           [boolean]
 
 Examples:
   certcli -k account.key -p account.pub -s  Get a certificate and save to
-  domain.csr -e test@example.com -c         `domain.crt`
-  domain.crt
+  domain.csr -c domain.crt                  `domain.crt`
   https_proxy=http://localhost:8080         Using a HTTP proxy if the
   certcli ...                               connectivity to Let's Encrypt API is
                                             not stable
